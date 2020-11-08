@@ -4,9 +4,16 @@ import random
 class Integer:
     """docstring for Integer"""
 
-    def __init__(self):
+    def __init__(self, upper=None, lower=None):
         self.upper = 10
         self.lower = -10
+        if upper is not None:
+            assert isinstance(upper, int)
+            self.upper = upper
+        if lower is not None:
+            assert isinstance(lower, int)
+            self.lower = lower
+
         self.discard = set()
 
     def in_range(self, upper, lower):
@@ -31,3 +38,9 @@ class Integer:
 
     def __str__(self):
         return str(self.pick())
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        pass
