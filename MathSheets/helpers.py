@@ -1,7 +1,8 @@
+from MathSheets.core import Value
 import random
 
 
-class Integer:
+class Integer(Value):
     """docstring for Integer"""
 
     def __init__(self, upper=None, lower=None):
@@ -25,15 +26,17 @@ class Integer:
 
     def non_zero(self):
         self.discard.add(0)
+        return self
 
     def remove(self, iterable):
         self.discard = self.discard.union(iterable)
+        return self
 
     def pick(self):
         if self.discard:
             valid = set(range(self.lower, self.upper))
-            valid = valid.intersection(self.discard)
-            return random.choice(valid)
+            valid = valid.difference(self.discard)
+            return random.sample(valid, 1)[0]
         return random.randint(self.lower, self.upper)
 
     def __str__(self):
