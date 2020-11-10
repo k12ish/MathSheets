@@ -2,7 +2,17 @@ from MathSheets.core import Value
 import random
 
 
-class Integer(Value):
+class Constant(Value):
+    """docstring for Constant"""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        pass
+
+
+class Integer(Constant):
     """docstring for Integer"""
 
     def __init__(self, upper=None, lower=None):
@@ -41,9 +51,3 @@ class Integer(Value):
 
     def __str__(self):
         return str(self.pick())
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        pass
