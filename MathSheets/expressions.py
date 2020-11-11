@@ -9,6 +9,9 @@ class Expression(Value):
     text: str
     _list: list
 
+    def __post_init__(self):
+        assert self.check()
+
     def __str__(self) -> str:
         return self.text.format(*self._list)
 
@@ -16,6 +19,9 @@ class Expression(Value):
         if self.text.count("{}") == len(self._list):
             return True
         return False
+
+    def asdict(self) -> dict:
+        return asdict(self)
 
     def rebuild(self) -> None:
         """substitutes subexpressions, removing nesting"""
@@ -40,9 +46,6 @@ class Expression(Value):
         self.text = ''.join(new_text)
         self._list = new_list
 
-    def asdict(self) -> dict:
-        return asdict(self)
-
     def substitute(self, exp, replacee=Variable()):
         assert isinstance(exp, Value)
         assert isinstance(replacee, Value)
@@ -50,6 +53,56 @@ class Expression(Value):
         self._list = [exp if isinstance(v, type(replacee)) else v
                       for v in self._list]
         return self
+
+    def __add__(self, other):
+        self.text = '(' + self.text + ') + (' + other.text + ')'
+        self._list.extend(other._list)
+
+    def __sub__(self, other):
+        self.text = '(' + self.text + ') - (' + other.text + ')'
+        self._list.extend(other._list)
+
+    def __mul__(self, other):
+        self.text = '(' + self.text + ')*(' + other.text + ')'
+        self._list.extend(other._list)
+
+    def __div__(self, other):
+        self.text = '(' + self.text + ')/(' + other.text + ')'
+        self._list.extend(other._list)
+
+
+class Trig(Expression):
+    """docstring for Trig"""
+
+    @staticmethod
+    def sin(self):
+        return Trig('sin({})', [Variable()])
+
+    @staticmethod
+    def cos(self):
+        return Trig('cos({})', [Variable()])
+
+    @staticmethod
+    def tan(self):
+        return Trig('tan({})', [Variable()])
+
+    @staticmethod
+    def sec(self):
+        return Trig('sec({})', [Variable()])
+
+    @staticmethod
+    def cot(self):
+        return Trig('cot({})', [Variable()])
+
+    @staticmethod
+    def csc(self):
+        return Trig('csc({})', [Variable()])
+
+    @staticmethod
+    def all(self):
+        return (Trig.sin(), Trig.cos(), Trig.tan(),
+                Trig.csc(), Trig.sec(), Trig.cot(),
+                )
 
 
 v = Variable()
@@ -60,15 +113,6 @@ ln = Expression('ln({})', [v])
 
 lin = Expression('{}*{} + {}', [i, v, i])
 inv = Expression('1/{}', [v])
-
-sin = Expression('sin({})', [v])
-cos = Expression('cos({})', [v])
-tan = Expression('tan({})', [v])
-
-sec = Expression('sec({})', [v])
-cot = Expression('cot({})', [v])
-cosec = Expression('cosec({})', [v])
-
 
 simple = OneFrom(
     exp, ln, inv, sin, cos, tan, sec, cot, cosec, lin

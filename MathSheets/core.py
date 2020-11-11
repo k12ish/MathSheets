@@ -22,7 +22,7 @@ class OneFrom(Value):
         self.values = values
 
     def __str__(self):
-        return self.pick
+        return self.pick()
 
     def pick(self):
         choice = random.choice(self.values)

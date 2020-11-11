@@ -18,11 +18,17 @@ def ret_eqtn():
 
 
 geo = {"top":"3.5cm","bottom":"3.5cm", "left":"3.7cm",
-       "right":"4.7cm", "columnsep":"30pt"}
+       "right":"4.5cm", "columnsep":"30pt"}
 qPaper = pylatex.Document(geometry_options=geo)
 qPaper.append(pylatex.NoEscape(r'\twocolumn'))
+
+
 for i in range(100):
-    eqtn = parse_expr(ret_eqtn())
-    LaTeX = sp.latex(eqtn)
-    qPaper.append(pylatex.Math(data=LaTeX, escape=False))
+    env = qPaper.create(
+        pylatex.Alignat(aligns=1, numbering=True, escape=False)
+    )
+    with env as env:
+        env.append(sp.latex(parse_expr(ret_eqtn())) + '\n\\\\')
+        env.append(sp.latex(parse_expr(ret_eqtn())))
+
 qPaper.generate_pdf('output\\test')
