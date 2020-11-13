@@ -13,7 +13,6 @@ def ret_eqtn():
     for i in range(2):
         pprint.pprint(base.asdict())
         base.substitute(copy.copy(sim.pick()))
-        base.rebuild()
     return str(base)
 
 
@@ -23,11 +22,14 @@ qPaper = pylatex.Document(geometry_options=geo)
 qPaper.append(pylatex.NoEscape(r'\twocolumn'))
 
 
-for i in range(100):
+for i in range(20):
     env = qPaper.create(
         pylatex.Alignat(aligns=1, numbering=True, escape=False)
     )
     with env as env:
+        env.append(sp.latex(parse_expr(ret_eqtn())) + '\n\\\\')
+        env.append(sp.latex(parse_expr(ret_eqtn())) + '\n\\\\')
+        env.append(sp.latex(parse_expr(ret_eqtn())) + '\n\\\\')
         env.append(sp.latex(parse_expr(ret_eqtn())) + '\n\\\\')
         env.append(sp.latex(parse_expr(ret_eqtn())))
 

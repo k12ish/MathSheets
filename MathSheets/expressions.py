@@ -1,6 +1,7 @@
 from dataclasses import dataclass, asdict
 from MathSheets.core import Value, Variable, OneFrom
 from MathSheets.constants import Integer
+from dacite import from_dict
 
 
 @dataclass
@@ -23,8 +24,30 @@ class Expression(Value):
     def asdict(self) -> dict:
         return asdict(self)
 
+    @staticmethod
+    def from_dict(data: dict):
+        return from_dict(data_class=Expression, data=data)
+
     def rebuild(self) -> None:
-        """substitutes subexpressions, removing nesting"""
+        """substitutes subexpressions, removing nesting
+
+        On rebuild, nested expressions get merged into the parent object
+
+        This Expression:             |  Is rebuilt to become:
+
+        Expression('e^{}',           |
+          [Expression('{}{}',        |  Expression('e^({}{})',
+             [Integer(), Variable()] |    [Integer(), Variable()]
+            )                        |  )
+          ]                          |
+        )
+
+        For each child expression (child) within parent._list,
+          - replace the corresponding '{}' in parent.text with
+            '(' + child.text + ')'
+          - remove the child and insert the elements from child._list
+            into parent._list
+        """
 
         assert self.check()
         new_subs = []
@@ -49,9 +72,8 @@ class Expression(Value):
     def substitute(self, exp, replacee=Variable()):
         assert isinstance(exp, Value)
         assert isinstance(replacee, Value)
-
-        self._list = [exp if isinstance(v, type(replacee)) else v
-                      for v in self._list]
+        self._list = [exp if v == replacee else v for v in self._list]
+        self.rebuild()
         return self
 
     def __add__(self, other):
@@ -71,38 +93,50 @@ class Expression(Value):
         self._list.extend(other._list)
 
 
-class Trig(Expression):
+class Trig:
     """docstring for Trig"""
 
     @staticmethod
-    def sin(self):
-        return Trig('sin({})', [Variable()])
+    def sin():
+        return Expression('sin({})', [Variable()])
 
     @staticmethod
-    def cos(self):
-        return Trig('cos({})', [Variable()])
+    def cos():
+        return Expression('cos({})', [Variable()])
 
     @staticmethod
-    def tan(self):
-        return Trig('tan({})', [Variable()])
+    def tan():
+        return Expression('tan({})', [Variable()])
 
     @staticmethod
-    def sec(self):
-        return Trig('sec({})', [Variable()])
+    def sec():
+        return Expression('sec({})', [Variable()])
 
     @staticmethod
-    def cot(self):
-        return Trig('cot({})', [Variable()])
+    def cot():
+        return Expression('cot({})', [Variable()])
 
     @staticmethod
-    def csc(self):
-        return Trig('csc({})', [Variable()])
+    def csc():
+        return Expression('csc({})', [Variable()])
 
     @staticmethod
-    def all(self):
+    def standard():
+        return (Trig.sin(), Trig.cos(), Trig.tan())
+
+    @staticmethod
+    def all():
         return (Trig.sin(), Trig.cos(), Trig.tan(),
-                Trig.csc(), Trig.sec(), Trig.cot(),
-                )
+                Trig.csc(), Trig.sec(), Trig.cot())
+
+    @staticmethod
+    def reciprocal():
+        return (Trig.csc(), Trig.sec(), Trig.cot())
+
+
+class Poly:
+    """docstring for Poly"""
+    pass
 
 
 v = Variable()
@@ -115,5 +149,5 @@ lin = Expression('{}*{} + {}', [i, v, i])
 inv = Expression('1/{}', [v])
 
 simple = OneFrom(
-    exp, ln, inv, sin, cos, tan, sec, cot, cosec, lin
+    exp, ln, inv, *Trig.standard(), lin, Trig.reciprocal()
 )

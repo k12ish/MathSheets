@@ -12,8 +12,21 @@ class Value:
 class Variable(Value):
     """docstring for Variable"""
 
+    def __init__(self, letter=None):
+        self.letter = letter
+
     def __str__(self):
+        if self.letter:
+            return self.letter
         return 'x'
+
+    def __eq__(self, other):
+        if isinstance(other, Variable):
+            return any([
+                None in {self.letter, other.letter},
+                self.letter == other.letter
+            ])
+        return False
 
 
 class OneFrom(Value):
@@ -29,3 +42,10 @@ class OneFrom(Value):
         if isinstance(choice, Value):
             return choice
         return OneFrom(*choice).pick()
+
+
+class Question:
+    """docstring for Question"""
+
+    def __init__(self, arg):
+        self.arg = arg
