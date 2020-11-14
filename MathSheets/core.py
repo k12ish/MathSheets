@@ -1,4 +1,5 @@
 import random
+import pylatex
 
 
 class Value:
@@ -42,10 +43,3 @@ class OneFrom(Value):
         if isinstance(choice, Value):
             return choice
         return OneFrom(*choice).pick()
-
-
-class Question:
-    """docstring for Question"""
-
-    def __init__(self, arg):
-        self.arg = arg
