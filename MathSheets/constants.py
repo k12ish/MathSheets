@@ -27,7 +27,7 @@ class Integer(Constant):
 
         self.discard = set()
 
-    def in_range(self, upper, lower):
+    def in_range(self, lower, upper):
         assert isinstance(upper, int)
         assert isinstance(lower, int)
         self.upper = upper

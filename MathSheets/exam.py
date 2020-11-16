@@ -5,6 +5,7 @@ from MathSheets.questions import Question
 class EquationEnvironment(pylatex.base_classes.Environment):
     """docstring for EquationEnvironment"""
     _latex_name = 'equation'
+    packages = [pylatex.package.Package('amsmath')]
 
 
 class Paper(pylatex.Document):
@@ -19,14 +20,20 @@ class Paper(pylatex.Document):
         for item in eqtns:
             self.append(pylatex.Math(data=item, escape=False))
 
+    def raw_extend(self, text_list):
+        for text in text_list:
+            self.extend(text)
+
 
 class Exam:
     """docstring for Exam"""
 
     def __init__(self):
-        self.q_paper = Paper()
+        geo = {"top":"3.5cm","bottom":"3.5cm", "left":"3.7cm",
+               "right":"4.5cm", "columnsep":"30pt"}
+        self.q_paper = Paper(geometry_options=geo)
         self.q_paper.append(pylatex.NoEscape(r'\twocolumn'))
-        self.a_paper = Paper()
+        self.a_paper = Paper(geometry_options=geo)
 
     def add_questions(self, *args):
         assert all((isinstance(item, Question) for item in args))

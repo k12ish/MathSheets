@@ -146,8 +146,9 @@ exp = Expression('e**{}', [v])
 ln = Expression('ln({})', [v])
 
 lin = Expression('{}*{} + {}', [i, v, i])
+expon = Expression('({})**{}', [v, i])
 inv = Expression('1/{}', [v])
 
 simple = OneFrom(
-    exp, ln, inv, *Trig.standard(), lin, Trig.reciprocal()
+    exp, ln, inv, *Trig.standard(), lin, Trig.reciprocal(), expon
 )
