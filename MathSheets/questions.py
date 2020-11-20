@@ -3,9 +3,11 @@ import pylatex
 from MathSheets.expressions import simple
 from MathSheets.constants import Integer
 from sympy.parsing.sympy_parser import parse_expr
-from sympy import diff
-from sympy import latex, simplify, trigsimp
+from sympy import diff, simplify, trigsimp
 from sympy.matrices import Matrix
+
+
+from sympy import latex
 
 
 def log_to_ln(func):
@@ -30,19 +32,36 @@ class Question:
         return super().__init_subclass__(*args, **kwargs)
 
 
-class Differenciate(Question):
-    """docstring for Differenciate"""
+class EquationListQuestion(Question):
+
+    def __init_subclass__(cls, *args, **kwargs):
+        assert hasattr(cls, "_build_questions_answers")
+        assert hasattr(cls, "_question_title")
+        assert hasattr(cls, "_question_prompt")
+        assert hasattr(cls, "_answer_title")
+        assert hasattr(cls, "_answer_prompt")
+        return super().__init_subclass__(*args, **kwargs)
 
     def write(self, qPaper, aPaper):
         questions, answers = self._build_questions_answers()
-        prompt = "Differenciate the following equations:"
-        with qPaper.create(pylatex.Section('Differenciation')):
-            qPaper.append(prompt)
+        with qPaper.create(pylatex.Section(self._question_title)):
+            if self._question_prompt:
+                qPaper.append(self._question_prompt)
             qPaper.add_numbered_equations(questions)
 
-        prompt = ""
-        with aPaper.create(pylatex.Section(prompt)):
+        with aPaper.create(pylatex.Section(self._answer_title)):
+            if self._answer_prompt:
+                aPaper.append(self._answer_prompt)
             aPaper.add_numbered_equations(answers)
+
+
+class Differenciate(EquationListQuestion):
+    """docstring for Differenciate"""
+    _question_title = "Differenciation"
+    _question_prompt = "Differenciate the following expressions:"
+
+    _answer_title = "Differenciation"
+    _answer_prompt = ""
 
     def _build_questions_answers(self):
         questions, answers = [], []
@@ -62,20 +81,14 @@ class Differenciate(Question):
         return parse_expr(str(base))
 
 
-class MatrixInverse(Question):
+class MatrixInverse(EquationListQuestion):
     """docstring for MatrixInverse"""
 
-    def write(self, qPaper, aPaper):
-        questions, answers = self._build_questions_answers()
-        prompt = "Find the inverse of the following matrices:"
-        with qPaper.create(pylatex.Section('Matrices')):
-            qPaper.append(prompt)
-            print(questions)
-            qPaper.add_numbered_equations(questions)
+    _question_title = "Matrices"
+    _question_prompt = "Calculate the inverse of the following:"
 
-        prompt = ""
-        with aPaper.create(pylatex.Section(prompt)):
-            aPaper.add_numbered_equations(answers)
+    _answer_title = "Matrices"
+    _answer_prompt = ""
 
     def _build_questions_answers(self):
         questions, answers = [], []
@@ -84,11 +97,10 @@ class MatrixInverse(Question):
             try:
                 answers.append(mat.inv())
                 questions.append(mat)
-            except sympy.matrices.common.NonInvertibleMatrixError:
+            except NonInvertibleMatrixError:
                 pass
 
         questions = list(map(latex, questions))
-        answers = list(map(simplify, answers))
         answers = list(map(latex, answers))
 
         def criteria(n):

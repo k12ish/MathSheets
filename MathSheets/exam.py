@@ -20,10 +20,6 @@ class Paper(pylatex.Document):
         for item in eqtns:
             self.append(pylatex.Math(data=item, escape=False))
 
-    def raw_extend(self, text_list):
-        for text in text_list:
-            self.extend(text)
-
 
 class Exam:
     """docstring for Exam"""
