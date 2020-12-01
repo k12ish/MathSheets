@@ -36,6 +36,7 @@ class EquationListQuestion(Question):
 
     def __init_subclass__(cls, *args, **kwargs):
         assert hasattr(cls, "_build_questions_answers")
+        assert callable(cls._build_questions_answers)
         assert hasattr(cls, "_question_title")
         assert hasattr(cls, "_question_prompt")
         assert hasattr(cls, "_answer_title")
@@ -81,6 +82,9 @@ class Differenciate(EquationListQuestion):
         return parse_expr(str(base))
 
 
+from sympy.matrices.common import NonInvertibleMatrixError
+
+
 class MatrixInverse(EquationListQuestion):
     """docstring for MatrixInverse"""
 
@@ -92,17 +96,20 @@ class MatrixInverse(EquationListQuestion):
 
     def _build_questions_answers(self):
         questions, answers = [], []
+        # We make twice as many questions than required
         for i in range(self.num * 2):
             mat = self._new_expr()
             try:
                 answers.append(mat.inv())
                 questions.append(mat)
+            # Ignore any errors
             except NonInvertibleMatrixError:
                 pass
 
         questions = list(map(latex, questions))
         answers = list(map(latex, answers))
 
+        # Crudely select matrices with a 'nicer' inverse
         def criteria(n):
             return len(n[0]) + len(n[1])
 

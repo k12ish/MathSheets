@@ -16,8 +16,7 @@ class Integer(Constant):
     """docstring for Integer"""
 
     def __init__(self, upper=None, lower=None):
-        self.upper = 10
-        self.lower = -10
+        self.upper, self.lower = 10, -10
         if upper is not None:
             assert isinstance(upper, int)
             self.upper = upper
@@ -25,6 +24,7 @@ class Integer(Constant):
             assert isinstance(lower, int)
             self.lower = lower
 
+        assert self.upper > self.lower
         self.discard = set()
 
     def in_range(self, lower, upper):
@@ -32,6 +32,7 @@ class Integer(Constant):
         assert isinstance(lower, int)
         self.upper = upper
         self.lower = lower
+        assert self.upper > self.lower
         return self
 
     def non_zero(self):

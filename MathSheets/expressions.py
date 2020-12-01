@@ -6,7 +6,7 @@ from dacite import from_dict
 
 @dataclass
 class Expression(Value):
-    """docstring for Expression"""
+    """Expressions objects represents maths expressions"""
     text: str
     _list: list
 
@@ -43,6 +43,7 @@ class Expression(Value):
         )
 
         For each child expression (child) within parent._list,
+          - recursively rebuild child
           - replace the corresponding '{}' in parent.text with
             '(' + child.text + ')'
           - remove the child and insert the elements from child._list

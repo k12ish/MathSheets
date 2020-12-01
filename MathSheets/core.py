@@ -2,7 +2,17 @@ import random
 
 
 class Value:
-    """The fundamental unit of expressions"""
+    """ The fundamental unit of expressions
+
+       Value objects denote anything that could go inside an equation.
+       Eg.
+       - The variable 'x'
+       - The integer '3'
+       - The expression 'x + 3'
+
+       All objects are defined to have a string representation
+       which can be parsed by sympy
+    """
 
     def __init_subclass__(cls, *args, **kwargs):
         assert hasattr(cls, "__str__")

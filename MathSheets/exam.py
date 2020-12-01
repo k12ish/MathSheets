@@ -22,7 +22,7 @@ class Paper(pylatex.Document):
 
 
 class Exam:
-    """docstring for Exam"""
+    """Exam objects store the relevant questions and answers"""
 
     def __init__(self):
         geo = {"top":"3.5cm","bottom":"3.5cm", "left":"3.7cm",
