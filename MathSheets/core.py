@@ -1,5 +1,3 @@
-import random
-
 
 class Value:
     """ The fundamental unit of expressions
@@ -37,18 +35,3 @@ class Variable(Value):
                 self.letter == other.letter
             ])
         return False
-
-
-class OneFrom(Value):
-
-    def __init__(self, *values):
-        self.values = values
-
-    def __str__(self):
-        return self.pick()
-
-    def pick(self):
-        choice = random.choice(self.values)
-        if isinstance(choice, Value):
-            return choice
-        return OneFrom(*choice).pick()

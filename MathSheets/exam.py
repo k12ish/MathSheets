@@ -1,5 +1,27 @@
 import pylatex
-from MathSheets.questions import Question
+from MathSheets.utils import string_to_sympy, sympy_to_latex
+from MathSheets.core import Value
+from sympy.core import basic
+
+
+class Exam:
+    """Exam objects store the relevant questions and answers"""
+
+    def __init__(self):
+        geo = {"top":"3.5cm","bottom":"3.5cm", "left":"3.7cm",
+               "right":"4.5cm", "columnsep":"30pt"}
+        self.q_paper = Paper(geometry_options=geo)
+        self.q_paper.append(pylatex.NoEscape(r'\twocolumn'))
+        self.a_paper = Paper(geometry_options=geo)
+
+    def add_questions(self, *args):
+        assert all((isinstance(item, Question) for item in args))
+        for item in args:
+            item.write(self.q_paper, self.a_paper)
+
+    def export(self, filename='output\\test'):
+        self.q_paper.generate_pdf(filename + '_questions')
+        self.a_paper.generate_pdf(filename + '_answers')
 
 
 class EquationEnvironment(pylatex.base_classes.Environment):
@@ -21,21 +43,81 @@ class Paper(pylatex.Document):
             self.append(pylatex.Math(data=item, escape=False))
 
 
-class Exam:
-    """Exam objects store the relevant questions and answers"""
+class Question:
+    """docstring for Question"""
 
-    def __init__(self):
-        geo = {"top":"3.5cm","bottom":"3.5cm", "left":"3.7cm",
-               "right":"4.5cm", "columnsep":"30pt"}
-        self.q_paper = Paper(geometry_options=geo)
-        self.q_paper.append(pylatex.NoEscape(r'\twocolumn'))
-        self.a_paper = Paper(geometry_options=geo)
+    def __init__(self, num_questions):
+        self.num = num_questions
 
-    def add_questions(self, *args):
-        assert all((isinstance(item, Question) for item in args))
-        for item in args:
-            item.write(self.q_paper, self.a_paper)
+    def __init_subclass__(cls, *args, **kwargs):
+        assert hasattr(cls, "write")
+        return super().__init_subclass__(*args, **kwargs)
 
-    def export(self, filename='output\\test'):
-        self.q_paper.generate_pdf(filename + '_questions')
-        self.a_paper.generate_pdf(filename + '_answers')
+
+class EquationListQuestion(Question):
+    """Questions which are lists of equations
+
+    Subclasses require:
+        _build_questions_answers  (callable)
+        _question_title
+        _answer_title
+        _question_prompt
+        _answer_prompt
+
+    including a `new_expr()` method is advised for ease of monkey patching
+
+    Eg:
+
+    class Simplify(EquationListQuestion):
+        _question_title = "Simplification"
+        _question_prompt = "Simplify the following:"
+        _answer_title = "Simplification"
+        _answer_prompt = ""
+
+        def _build_questions_answers(self):
+            pass
+        def _new_expr(self):
+            pass
+
+    """
+
+    def __init_subclass__(cls, *args, **kwargs):
+        assert hasattr(cls, "_build_questions_answers")
+        assert callable(cls._build_questions_answers)
+        assert hasattr(cls, "_question_title")
+        assert hasattr(cls, "_answer_title")
+
+        assert hasattr(cls, "_question_prompt")
+        assert hasattr(cls, "_answer_prompt")
+        return super().__init_subclass__(*args, **kwargs)
+
+    def write(self, qPaper, aPaper):
+        questions, answers = self._build_questions_answers()
+        questions, answers = self._into_latex(questions, answers)
+
+        with qPaper.create(pylatex.Section(self._question_title)):
+            if self._question_prompt:
+                qPaper.append(self._question_prompt)
+            qPaper.add_numbered_equations(questions)
+
+        with aPaper.create(pylatex.Section(self._answer_title)):
+            if self._answer_prompt:
+                aPaper.append(self._answer_prompt)
+            aPaper.add_numbered_equations(answers)
+
+    def _into_latex(self, *args):
+        """Converts lists of stuff into latex
+
+        FIXME: assumes itemlist is homegenous; all items are assumed
+               to be the same type
+        """
+        for item_list in args:
+            # If its a Value, convert it to sympy
+            if isinstance(item_list[0], Value):
+                item_list = [str(item) for item in item_list]
+                item_list = [string_to_sympy(item) for item in item_list]
+            # If its Sympy, convert it to latex
+            if isinstance(item_list[0], basic.Basic):
+                item_list = [sympy_to_latex(item) for item in item_list]
+            # All items in item_list should be latex strings
+        return args

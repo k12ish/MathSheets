@@ -1,59 +1,10 @@
-import copy
-import pylatex
-from MathSheets.expressions import simple
+from MathSheets.expressions import simple, Poly
+from MathSheets.exam import EquationListQuestion
+from MathSheets.utils import string_to_sympy
 from MathSheets.constants import Integer
-from sympy.parsing.sympy_parser import parse_expr
-from sympy import diff, simplify, trigsimp
+from sympy import diff, simplify
 from sympy.matrices import Matrix
-
-
-from sympy import latex
-
-
-def log_to_ln(func):
-    def inner(*args, **kwargs):
-        ret_string = func(*args, **kwargs)
-        ret_string = ret_string.replace('\\log', '\\ln')
-        return ret_string
-    return inner
-
-
-latex = log_to_ln(latex)
-
-
-class Question:
-    """docstring for Question"""
-
-    def __init__(self, num_questions):
-        self.num = num_questions
-
-    def __init_subclass__(cls, *args, **kwargs):
-        assert hasattr(cls, "write")
-        return super().__init_subclass__(*args, **kwargs)
-
-
-class EquationListQuestion(Question):
-
-    def __init_subclass__(cls, *args, **kwargs):
-        assert hasattr(cls, "_build_questions_answers")
-        assert callable(cls._build_questions_answers)
-        assert hasattr(cls, "_question_title")
-        assert hasattr(cls, "_question_prompt")
-        assert hasattr(cls, "_answer_title")
-        assert hasattr(cls, "_answer_prompt")
-        return super().__init_subclass__(*args, **kwargs)
-
-    def write(self, qPaper, aPaper):
-        questions, answers = self._build_questions_answers()
-        with qPaper.create(pylatex.Section(self._question_title)):
-            if self._question_prompt:
-                qPaper.append(self._question_prompt)
-            qPaper.add_numbered_equations(questions)
-
-        with aPaper.create(pylatex.Section(self._answer_title)):
-            if self._answer_prompt:
-                aPaper.append(self._answer_prompt)
-            aPaper.add_numbered_equations(answers)
+from sympy.matrices.common import NonInvertibleMatrixError
 
 
 class Differenciate(EquationListQuestion):
@@ -70,19 +21,14 @@ class Differenciate(EquationListQuestion):
             expr = self._new_expr()
             symbol = expr.free_symbols.pop()
             questions.append(expr)
-            answers.append(trigsimp(simplify(diff(expr, symbol))))
-        questions = list(map(latex, questions))
-        answers = list(map(latex, answers))
+            answers.append(simplify(diff(expr, symbol)))
         return questions, answers
 
     def _new_expr(self):
-        base = copy.copy(simple.pick())
+        base = simple.pick()
         for i in range(2):
-            base.substitute(copy.copy(simple.pick()))
-        return parse_expr(str(base))
-
-
-from sympy.matrices.common import NonInvertibleMatrixError
+            base.substitute(simple.pick())
+        return string_to_sympy(str(base))
 
 
 class MatrixInverse(EquationListQuestion):
@@ -96,30 +42,34 @@ class MatrixInverse(EquationListQuestion):
 
     def _build_questions_answers(self):
         questions, answers = [], []
-        # We make twice as many questions than required
-        for i in range(self.num * 2):
+        # We make as many questions as required
+        while len(questions) < self.num:
             mat = self._new_expr()
             try:
                 answers.append(mat.inv())
                 questions.append(mat)
-            # Ignore any errors
+            # Ignore any errors that come up in the process
             except NonInvertibleMatrixError:
                 pass
-
-        questions = list(map(latex, questions))
-        answers = list(map(latex, answers))
-
-        # Crudely select matrices with a 'nicer' inverse
-        def criteria(n):
-            return len(n[0]) + len(n[1])
-
-        zipped = list(zip(questions, answers))
-        zipped.sort(key=criteria)
-        questions = [i[0] for i in zipped][:self.num]
-        answers = [i[1] for i in zipped][:self.num]
         return questions, answers
 
     def _new_expr(self):
         i = Integer().in_range(-9,9)
         nums = [int(str(i)) for item in range(9)]
         return Matrix(3,3, nums)
+
+
+class Simplify(EquationListQuestion):
+    """docstring for Simplify"""
+
+    _question_title = "Simplification"
+    _question_prompt = "Simplify the following:"
+
+    _answer_title = "Simplification"
+    _answer_prompt = ""
+
+    def _build_questions_answers(self):
+        pass
+
+    def _new_expr(self):
+        return Poly.linear()
