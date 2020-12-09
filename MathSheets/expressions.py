@@ -1,5 +1,4 @@
-from MathSheets.core import Value, Variable
-from MathSheets.utils import OneCopyFrom
+from MathSheets.core import Value, Variable, OneFrom
 from MathSheets.constants import Integer
 from dataclasses import dataclass, asdict
 from dacite import from_dict
@@ -124,27 +123,21 @@ class Trig:
 
     @staticmethod
     def standard():
-        return (Trig.sin, Trig.cos, Trig.tan)
-
-    @staticmethod
-    def reciprocal():
-        return (Trig.csc, Trig.sec, Trig.cot)
+        return (Trig.sin(), Trig.cos(), Trig.tan())
 
     @staticmethod
     def all():
-        return (Trig.sin, Trig.cos, Trig.tan,
-                Trig.csc, Trig.sec, Trig.cot)
+        return (Trig.sin(), Trig.cos(), Trig.tan(),
+                Trig.csc(), Trig.sec(), Trig.cot())
+
+    @staticmethod
+    def reciprocal():
+        return (Trig.csc(), Trig.sec(), Trig.cot())
 
 
 class Poly:
     """docstring for Poly"""
-    @staticmethod
-    def linear(v=Variable(), i=Integer().non_zero()):
-        return Expression('{}*{} + {}', [i, v, i])
-
-    @staticmethod
-    def quadratic(v=Variable(), i=Integer().non_zero()):
-        return Expression('{}*({})**2 + {}*({}) + {}', [i, v, i, v, i])
+    pass
 
 
 v = Variable()
@@ -157,7 +150,6 @@ lin = Expression('{}*{} + {}', [i, v, i])
 expon = Expression('({})**{}', [v, i])
 inv = Expression('1/{}', [v])
 
-
-simple = OneCopyFrom(
+simple = OneFrom(
     exp, ln, inv, *Trig.standard(), lin, Trig.reciprocal(), expon
 )
