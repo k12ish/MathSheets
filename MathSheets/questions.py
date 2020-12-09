@@ -1,12 +1,11 @@
 import copy
-import pylatex
 from MathSheets.expressions import simple
 from MathSheets.constants import Integer
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import diff, simplify, trigsimp
 from sympy.matrices import Matrix
-
-
+from sympy.matrices.common import NonInvertibleMatrixError
+from MathSheets.exam import EquationListQuestion
 from sympy import latex
 
 
@@ -19,41 +18,6 @@ def log_to_ln(func):
 
 
 latex = log_to_ln(latex)
-
-
-class Question:
-    """docstring for Question"""
-
-    def __init__(self, num_questions):
-        self.num = num_questions
-
-    def __init_subclass__(cls, *args, **kwargs):
-        assert hasattr(cls, "write")
-        return super().__init_subclass__(*args, **kwargs)
-
-
-class EquationListQuestion(Question):
-
-    def __init_subclass__(cls, *args, **kwargs):
-        assert hasattr(cls, "_build_questions_answers")
-        assert callable(cls._build_questions_answers)
-        assert hasattr(cls, "_question_title")
-        assert hasattr(cls, "_question_prompt")
-        assert hasattr(cls, "_answer_title")
-        assert hasattr(cls, "_answer_prompt")
-        return super().__init_subclass__(*args, **kwargs)
-
-    def write(self, qPaper, aPaper):
-        questions, answers = self._build_questions_answers()
-        with qPaper.create(pylatex.Section(self._question_title)):
-            if self._question_prompt:
-                qPaper.append(self._question_prompt)
-            qPaper.add_numbered_equations(questions)
-
-        with aPaper.create(pylatex.Section(self._answer_title)):
-            if self._answer_prompt:
-                aPaper.append(self._answer_prompt)
-            aPaper.add_numbered_equations(answers)
 
 
 class Differenciate(EquationListQuestion):
@@ -82,9 +46,6 @@ class Differenciate(EquationListQuestion):
         return parse_expr(str(base))
 
 
-from sympy.matrices.common import NonInvertibleMatrixError
-
-
 class MatrixInverse(EquationListQuestion):
     """docstring for MatrixInverse"""
 
@@ -96,8 +57,7 @@ class MatrixInverse(EquationListQuestion):
 
     def _build_questions_answers(self):
         questions, answers = [], []
-        # We make twice as many questions than required
-        for i in range(self.num * 2):
+        while len(questions) < self.num:
             mat = self._new_expr()
             try:
                 answers.append(mat.inv())
@@ -109,14 +69,6 @@ class MatrixInverse(EquationListQuestion):
         questions = list(map(latex, questions))
         answers = list(map(latex, answers))
 
-        # Crudely select matrices with a 'nicer' inverse
-        def criteria(n):
-            return len(n[0]) + len(n[1])
-
-        zipped = list(zip(questions, answers))
-        zipped.sort(key=criteria)
-        questions = [i[0] for i in zipped][:self.num]
-        answers = [i[1] for i in zipped][:self.num]
         return questions, answers
 
     def _new_expr(self):

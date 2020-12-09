@@ -98,28 +98,28 @@ class Trig:
     """docstring for Trig"""
 
     @staticmethod
-    def sin():
-        return Expression('sin({})', [Variable()])
+    def sin(v=Variable()):
+        return Expression('sin({})', [v])
 
     @staticmethod
-    def cos():
-        return Expression('cos({})', [Variable()])
+    def cos(v=Variable()):
+        return Expression('cos({})', [v])
 
     @staticmethod
-    def tan():
-        return Expression('tan({})', [Variable()])
+    def tan(v=Variable()):
+        return Expression('tan({})', [v])
 
     @staticmethod
-    def sec():
-        return Expression('sec({})', [Variable()])
+    def sec(v=Variable()):
+        return Expression('sec({})', [v])
 
     @staticmethod
-    def cot():
-        return Expression('cot({})', [Variable()])
+    def cot(v=Variable()):
+        return Expression('cot({})', [v])
 
     @staticmethod
-    def csc():
-        return Expression('csc({})', [Variable()])
+    def csc(v=Variable()):
+        return Expression('csc({})', [v])
 
     @staticmethod
     def standard():
@@ -137,7 +137,13 @@ class Trig:
 
 class Poly:
     """docstring for Poly"""
-    pass
+    @staticmethod
+    def linear(v=Variable(), i=Integer().non_zero()):
+        return Expression('{}*{} + {}', [i, v, i])
+
+    @staticmethod
+    def quadratic(v=Variable(), i=Integer().non_zero()):
+        return Expression('{}*({})**2 + {}*({}) + {}', [i, v, i, v, i])
 
 
 v = Variable()
