@@ -1,23 +1,12 @@
 import copy
-from MathSheets.expressions import simple
-from MathSheets.constants import Integer
+from Expressions.expressions import simple
+from Expressions.constants import Integer
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import diff, simplify, trigsimp
 from sympy.matrices import Matrix
 from sympy.matrices.common import NonInvertibleMatrixError
 from MathSheets.exam import EquationListQuestion
-from sympy import latex
-
-
-def log_to_ln(func):
-    def inner(*args, **kwargs):
-        ret_string = func(*args, **kwargs)
-        ret_string = ret_string.replace('\\log', '\\ln')
-        return ret_string
-    return inner
-
-
-latex = log_to_ln(latex)
+from MathSheets.utils import sympy_to_latex
 
 
 class Differenciate(EquationListQuestion):
@@ -35,8 +24,8 @@ class Differenciate(EquationListQuestion):
             symbol = expr.free_symbols.pop()
             questions.append(expr)
             answers.append(trigsimp(simplify(diff(expr, symbol))))
-        questions = list(map(latex, questions))
-        answers = list(map(latex, answers))
+        questions = list(map(sympy_to_latex, questions))
+        answers = list(map(sympy_to_latex, answers))
         return questions, answers
 
     def _new_expr(self):
@@ -66,8 +55,8 @@ class MatrixInverse(EquationListQuestion):
             except NonInvertibleMatrixError:
                 pass
 
-        questions = list(map(latex, questions))
-        answers = list(map(latex, answers))
+        questions = list(map(sympy_to_latex, questions))
+        answers = list(map(sympy_to_latex, answers))
 
         return questions, answers
 

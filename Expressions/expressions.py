@@ -1,5 +1,5 @@
-from MathSheets.core import Value, Variable, OneFrom
-from MathSheets.constants import Integer
+from Expressions.core import Value, Variable, OneFrom
+from Expressions.constants import Integer
 from dataclasses import dataclass, asdict
 from dacite import from_dict
 
