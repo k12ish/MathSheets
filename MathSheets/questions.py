@@ -1,7 +1,6 @@
 import copy
 from Expressions.expressions import simple
 from Expressions.constants import Integer
-from sympy.parsing.sympy_parser import parse_expr
 from sympy import diff, simplify, trigsimp
 from sympy.matrices import Matrix
 from sympy.matrices.common import NonInvertibleMatrixError
@@ -32,7 +31,7 @@ class Differenciate(EquationListQuestion):
         base = copy.copy(simple.pick())
         for i in range(2):
             base.substitute(copy.copy(simple.pick()))
-        return parse_expr(str(base))
+        return base.into_sympy()
 
 
 class MatrixInverse(EquationListQuestion):

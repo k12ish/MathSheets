@@ -1,15 +1,5 @@
-from Expressions.core import Value
+from Expressions.core import Constant
 import random
-
-
-class Constant(Value):
-    """docstring for Constant"""
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        pass
 
 
 class Integer(Constant):
