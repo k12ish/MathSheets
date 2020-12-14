@@ -21,6 +21,9 @@ class Value:
         assert hasattr(cls, "__str__")
         return super().__init_subclass__(*args, **kwargs)
 
+    def into_sympy(self):
+        return parse_expr(str(self))
+
 
 class Variable(Value):
     """docstring for Variable"""
@@ -83,9 +86,6 @@ class Expression(Value):
         if self.text.count("{}") == len(self._list):
             return True
         return False
-
-    def into_sympy(self):
-        return parse_expr(str(self))
 
     def into_dict(self) -> dict:
         return asdict(self)

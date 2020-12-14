@@ -46,6 +46,15 @@ class Trig:
 class Poly:
     """docstring for Poly"""
     @staticmethod
+    def straight_line(m=Integer().non_zero(), x=Variable(), c=Integer()):
+        return Expression('{}*{} + {}', [m, x, c])
+
+    @staticmethod
+    def of_degree(degree, v=Variable(), i=Integer().non_zero()):
+        return Expression('*'.join(['({} + {})'] * degree),
+                          [i, v] * degree)
+
+    @staticmethod
     def linear(v=Variable(), i=Integer().non_zero()):
         return Expression('{}*{} + {}', [i, v, i])
 

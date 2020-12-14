@@ -1,3 +1,4 @@
+from MathSheets.utils import equation_list_to_latex
 import pylatex
 
 
@@ -59,17 +60,13 @@ class EquationListQuestion(Question):
         _answer_title
         _question_prompt
         _answer_prompt
+
+
     including a `new_expr()` method is advised for ease of monkey patching
-    Eg:
-    class Simplify(EquationListQuestion):
-        _question_title = "Simplification"
-        _question_prompt = "Simplify the following:"
-        _answer_title = "Simplification"
-        _answer_prompt = ""
-        def _build_questions_answers(self):
-            pass
-        def _new_expr(self):
-            pass
+
+    _build_questions_answers returns a (questions, answers) pair
+    (questions, answers) must be lists of strings/sympy/expressions
+    all elements in these lists must have the same type
     """
     def __init_subclass__(cls, *args, **kwargs):
         assert hasattr(cls, "_build_questions_answers")
@@ -82,6 +79,8 @@ class EquationListQuestion(Question):
 
     def write(self, qPaper, aPaper):
         questions, answers = self._build_questions_answers()
+        questions = equation_list_to_latex(questions)
+        answers = equation_list_to_latex(answers)
         with qPaper.create(pylatex.Section(self._question_title)):
             if self._question_prompt:
                 qPaper.append(self._question_prompt)

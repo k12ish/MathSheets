@@ -23,8 +23,6 @@ class Differenciate(EquationListQuestion):
             symbol = expr.free_symbols.pop()
             questions.append(expr)
             answers.append(trigsimp(simplify(diff(expr, symbol))))
-        questions = list(map(sympy_to_latex, questions))
-        answers = list(map(sympy_to_latex, answers))
         return questions, answers
 
     def _new_expr(self):
