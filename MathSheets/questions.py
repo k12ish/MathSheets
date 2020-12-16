@@ -1,19 +1,18 @@
 import copy
-from Expressions.expressions import simple
+from Expressions.expressions import simple, Poly
 from Expressions.constants import Integer
-from sympy import diff, simplify, trigsimp
+from sympy import diff, simplify, trigsimp, expand
 from sympy.matrices import Matrix
 from sympy.matrices.common import NonInvertibleMatrixError
 from MathSheets.exam import EquationListQuestion
-from MathSheets.utils import sympy_to_latex
 
 
-class Differenciate(EquationListQuestion):
-    """docstring for Differenciate"""
-    _question_title = "Differenciation"
-    _question_prompt = "Differenciate the following expressions:"
+class Differentiate(EquationListQuestion):
+    """docstring for Differentiate"""
+    _question_title = "Differentiation"
+    _question_prompt = "Differentiate the following expressions:"
 
-    _answer_title = "Differenciation"
+    _answer_title = "Differentiation"
     _answer_prompt = ""
 
     def _build_questions_answers(self):
@@ -30,6 +29,26 @@ class Differenciate(EquationListQuestion):
         for i in range(2):
             base.substitute(copy.copy(simple.pick()))
         return base.into_sympy()
+
+
+class ExpandPolynomial(EquationListQuestion):
+    """docstring for ExpandPolynomial"""
+    _question_title = ""
+    _question_prompt = "Expand the following expressions:"
+
+    _answer_title = ""
+    _answer_prompt = ""
+
+    def _build_questions_answers(self):
+        questions, answers = [], []
+        for i in range(self.num):
+            expr = self._new_expr()
+            questions.append(expr)
+            answers.append(simplify(expand(expr)))
+        return questions, answers
+
+    def _new_expr(self):
+        return Poly.of_degree(3).into_sympy()
 
 
 class MatrixInverse(EquationListQuestion):
@@ -51,10 +70,6 @@ class MatrixInverse(EquationListQuestion):
             # Ignore any errors
             except NonInvertibleMatrixError:
                 pass
-
-        questions = list(map(sympy_to_latex, questions))
-        answers = list(map(sympy_to_latex, answers))
-
         return questions, answers
 
     def _new_expr(self):

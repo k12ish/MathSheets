@@ -8,9 +8,9 @@ class Exam:
     def __init__(self):
         geo = {"top":"3.5cm","bottom":"3.5cm", "left":"3.7cm",
                "right":"4.5cm", "columnsep":"30pt"}
-        self.q_paper = Paper(geometry_options=geo)
+        self.q_paper = MathDoc(geometry_options=geo)
         self.q_paper.append(pylatex.NoEscape(r'\twocolumn'))
-        self.a_paper = Paper(geometry_options=geo)
+        self.a_paper = MathDoc(geometry_options=geo)
 
     def add_questions(self, *args):
         assert all((isinstance(item, Question) for item in args))
@@ -28,7 +28,7 @@ class EquationEnvironment(pylatex.base_classes.Environment):
     packages = [pylatex.package.Package('amsmath')]
 
 
-class Paper(pylatex.Document):
+class MathDoc(pylatex.Document):
     """docstring for Paper"""
 
     def add_numbered_equations(self, eqtns):
@@ -77,16 +77,16 @@ class EquationListQuestion(Question):
         assert hasattr(cls, "_answer_prompt")
         return super().__init_subclass__(*args, **kwargs)
 
-    def write(self, qPaper, aPaper):
+    def write(self, q_paper, a_paper):
         questions, answers = self._build_questions_answers()
         questions = equation_list_to_latex(questions)
         answers = equation_list_to_latex(answers)
-        with qPaper.create(pylatex.Section(self._question_title)):
+        with q_paper.create(pylatex.Section(self._question_title)):
             if self._question_prompt:
-                qPaper.append(self._question_prompt)
-            qPaper.add_numbered_equations(questions)
+                q_paper.append(self._question_prompt)
+            q_paper.add_numbered_equations(questions)
 
-        with aPaper.create(pylatex.Section(self._answer_title)):
+        with a_paper.create(pylatex.Section(self._answer_title)):
             if self._answer_prompt:
-                aPaper.append(self._answer_prompt)
-            aPaper.add_numbered_equations(answers)
+                a_paper.append(self._answer_prompt)
+            a_paper.add_numbered_equations(answers)

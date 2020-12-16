@@ -7,14 +7,21 @@ import random
 class Value:
     """ The fundamental unit of expressions
 
-       Value objects denote anything that could go inside an equation.
-       Eg.
+        Value objects denote anything that could go inside an equation.
+        Eg.
        - The variable 'x'
        - The integer '3'
        - The expression 'x + 3'
 
-       All objects are defined to have a string representation
-       which can be parsed by sympy
+        All objects are defined to have a string representation which
+        can be parsed by sympy.
+
+        Value instances can be used context-manager style:
+            ```
+            with Integer().non_zero() as i:
+                Expression('{}*{}', [i, i])
+            ```
+        This is just syntactic sugar and serves no purpose.
     """
 
     def __init_subclass__(cls, *args, **kwargs):
@@ -24,9 +31,15 @@ class Value:
     def into_sympy(self):
         return parse_expr(str(self))
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        pass
+
 
 class Variable(Value):
-    """docstring for Variable"""
+    """Variables represent symbols within expressions"""
 
     def __init__(self, letter=None):
         self.letter = letter
@@ -45,29 +58,10 @@ class Variable(Value):
         return False
 
 
-class OneFrom(Value):
-
-    def __init__(self, *values):
-        self.values = values
-
-    def __str__(self):
-        return self.pick()
-
-    def pick(self):
-        choice = random.choice(self.values)
-        if isinstance(choice, Value):
-            return choice
-        return OneFrom(*choice).pick()
-
-
 class Constant(Value):
-    """docstring for Constant"""
+    """Constants represent numbers within expressions"""
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        pass
+    pass
 
 
 @dataclass
@@ -158,3 +152,19 @@ class Expression(Value):
     def __div__(self, other):
         self.text = '(' + self.text + ')/(' + other.text + ')'
         self._list.extend(other._list)
+
+
+class OneFrom(Value):
+    """OneFrom instances randomly pick a string when prompted"""
+
+    def __init__(self, *values):
+        self.values = values
+
+    def __str__(self):
+        return self.pick()
+
+    def pick(self):
+        choice = random.choice(self.values)
+        if isinstance(choice, Value):
+            return choice
+        return OneFrom(*choice).pick()
