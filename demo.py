@@ -1,11 +1,11 @@
 from MathSheets.exam import Exam
-from MathSheets.questions import Differentiate, MatrixInverse, SimplifyPolynomial
+from MathSheets.questions import Differentiate, MatrixInverse, ExpandPolynomial
 
 
 exam = Exam()
 exam.add_questions(
-    Differentiate(20),
+    Differentiate(10),
     MatrixInverse(10),
-    SimplifyPolynomial(10)
+    ExpandPolynomial(10)
 )
 exam.export()

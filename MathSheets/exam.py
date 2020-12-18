@@ -1,4 +1,5 @@
 from MathSheets.utils import equation_list_to_latex
+from enum import Enum, auto
 import pylatex
 
 
@@ -71,22 +72,52 @@ class EquationListQuestion(Question):
     def __init_subclass__(cls, *args, **kwargs):
         assert hasattr(cls, "_build_questions_answers")
         assert callable(cls._build_questions_answers)
-        assert hasattr(cls, "_question_title")
-        assert hasattr(cls, "_question_prompt")
-        assert hasattr(cls, "_answer_title")
-        assert hasattr(cls, "_answer_prompt")
+        assert hasattr(cls, "_topic")
+        assert hasattr(cls, "_prompt")
         return super().__init_subclass__(*args, **kwargs)
 
     def write(self, q_paper, a_paper):
         questions, answers = self._build_questions_answers()
         questions = equation_list_to_latex(questions)
         answers = equation_list_to_latex(answers)
-        with q_paper.create(pylatex.Section(self._question_title)):
-            if self._question_prompt:
-                q_paper.append(self._question_prompt)
+
+        with q_paper.create(pylatex.Section(str(self._topic))):
+            q_paper.append(self._prompt)
             q_paper.add_numbered_equations(questions)
 
-        with a_paper.create(pylatex.Section(self._answer_title)):
-            if self._answer_prompt:
-                a_paper.append(self._answer_prompt)
+        with a_paper.create(pylatex.Section("")):
             a_paper.add_numbered_equations(answers)
+
+
+class Prompts(Enum):
+    """docstring for Prompts"""
+    SIMPLIFY = auto()
+    EXPAND = auto()
+    CALCULATE = auto()
+    DIFFERENTIATE = auto()
+    INTEGRATE = auto()
+
+    def __str__(self):
+        return self.name.capitalize() + ' the following:'
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
+
+
+class Topics(Enum):
+    """docstring for Topic"""
+
+    MATRICES = auto()
+    CALCULUS = auto()
+    ALGEBRA = auto()
+    GEOMETRY = auto()
+
+    def __str__(self):
+        return self.name.capitalize()
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented

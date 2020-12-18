@@ -4,16 +4,13 @@ from Expressions.constants import Integer
 from sympy import diff, simplify, trigsimp, expand
 from sympy.matrices import Matrix
 from sympy.matrices.common import NonInvertibleMatrixError
-from MathSheets.exam import EquationListQuestion
+from MathSheets.exam import EquationListQuestion, Prompts, Topics
 
 
 class Differentiate(EquationListQuestion):
     """docstring for Differentiate"""
-    _question_title = "Differentiation"
-    _question_prompt = "Differentiate the following expressions:"
-
-    _answer_title = "Differentiation"
-    _answer_prompt = ""
+    _topic = Topics.CALCULUS
+    _prompt = Prompts.DIFFERENTIATE
 
     def _build_questions_answers(self):
         questions, answers = [], []
@@ -33,11 +30,8 @@ class Differentiate(EquationListQuestion):
 
 class ExpandPolynomial(EquationListQuestion):
     """docstring for ExpandPolynomial"""
-    _question_title = ""
-    _question_prompt = "Expand the following expressions:"
-
-    _answer_title = ""
-    _answer_prompt = ""
+    _topic = Topics.ALGEBRA
+    _prompt = Prompts.EXPAND
 
     def _build_questions_answers(self):
         questions, answers = [], []
@@ -53,12 +47,8 @@ class ExpandPolynomial(EquationListQuestion):
 
 class MatrixInverse(EquationListQuestion):
     """docstring for MatrixInverse"""
-
-    _question_title = "Matrices"
-    _question_prompt = "Calculate the inverse of the following:"
-
-    _answer_title = "Matrices"
-    _answer_prompt = ""
+    _topic = Topics.MATRICES
+    _prompt = "Find the inverse of the following:"
 
     def _build_questions_answers(self):
         questions, answers = [], []
