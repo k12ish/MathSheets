@@ -31,6 +31,30 @@ class EquationEnvironment(pylatex.base_classes.Environment):
 
 class MathDoc(pylatex.Document):
     """docstring for Paper"""
+    _last_topic = None
+    _last_prompt = None
+
+    def within_topic(self, next_topic):
+        if self._last_topic is None:
+            self._write_topic(next_topic)
+        elif self._last_topic != next_topic:
+            self._write_topic(next_topic)
+
+    def within_prompt(self, next_prompt):
+        if self._last_prompt is None:
+            self._write_prompt(next_prompt)
+        elif self._last_prompt != next_prompt:
+            self._write_prompt(next_prompt)
+
+    def _write_topic(self, topic):
+        self.append(pylatex.Section(str(topic)))
+        self._last_topic = topic
+        # Force the next prompt to be displayed
+        self._last_prompt = None
+
+    def _write_prompt(self, prompt):
+        self.append(str(prompt))
+        self._last_prompt = prompt
 
     def add_numbered_equations(self, eqtns):
         for item in eqtns:
@@ -57,13 +81,10 @@ class EquationListQuestion(Question):
     """Questions which are lists of equations
     Subclasses require:
         _build_questions_answers  (callable)
-        _question_title
-        _answer_title
-        _question_prompt
-        _answer_prompt
+        _topic
+        _prompt
 
-
-    including a `new_expr()` method is advised for ease of monkey patching
+    including a `new_expr()` method is advised
 
     _build_questions_answers returns a (questions, answers) pair
     (questions, answers) must be lists of strings/sympy/expressions
@@ -81,12 +102,12 @@ class EquationListQuestion(Question):
         questions = equation_list_to_latex(questions)
         answers = equation_list_to_latex(answers)
 
-        with q_paper.create(pylatex.Section(str(self._topic))):
-            q_paper.append(self._prompt)
-            q_paper.add_numbered_equations(questions)
+        q_paper.within_topic(self._topic)
+        q_paper.within_prompt(self._prompt)
+        q_paper.add_numbered_equations(questions)
 
-        with a_paper.create(pylatex.Section("")):
-            a_paper.add_numbered_equations(answers)
+        a_paper.within_topic(self._topic)
+        a_paper.add_numbered_equations(answers)
 
 
 class Prompts(Enum):
