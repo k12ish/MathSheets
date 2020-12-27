@@ -1,5 +1,6 @@
 from MathSheets.utils import equation_list_to_latex
 from enum import Enum, auto
+from random import shuffle
 import pylatex
 
 
@@ -35,12 +36,14 @@ class MathDoc(pylatex.Document):
     _last_prompt = None
 
     def within_topic(self, next_topic):
+        """write next topic if topic different to previous topic"""
         if self._last_topic is None:
             self._write_topic(next_topic)
         elif self._last_topic != next_topic:
             self._write_topic(next_topic)
 
     def within_prompt(self, next_prompt):
+        """write next prompt if prompt different to previous prompt"""
         if self._last_prompt is None:
             self._write_prompt(next_prompt)
         elif self._last_prompt != next_prompt:
@@ -108,6 +111,39 @@ class EquationListQuestion(Question):
 
         a_paper.within_topic(self._topic)
         a_paper.add_numbered_equations(answers)
+
+    def is_similar(self, other):
+        return all([self._topic is other.topic,
+                    self._prompt is other.prompt])
+
+    def __add__(self, other):
+        if self.is_similar(other):
+            return ELQContainer(self).join(other)
+
+
+class ELQContainer(EquationListQuestion):
+    """docstring for ELQContainer"""
+    _topic = None
+    _prompt = None
+
+    def __init__(self, question):
+        self._topic = question._topic
+        self._prompt = question._prompt
+        questions, answers = question._build_questions_answers()
+        self.questions, self.answers = questions, answers
+
+    def join(self, other):
+        questions, answers = other._build_questions_answers()
+        self.questions.extend(questions)
+        self.answers.extend(answers)
+
+    def shuffle(self):
+        pairs = list(zip(self.questions, self.answers))
+        shuffle(pairs)
+        self.questions, self.answers = zip(*pairs)
+
+    def _build_questions_answers(self):
+        return self.questions, self.answers
 
 
 class Prompts(Enum):

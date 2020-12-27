@@ -28,7 +28,7 @@ class Value:
         assert hasattr(cls, "__str__")
         return super().__init_subclass__(*args, **kwargs)
 
-    def into_sympy(self):
+    def as_sympy(self):
         return parse_expr(str(self))
 
     def __enter__(self):
@@ -81,7 +81,7 @@ class Expression(Value):
             return True
         return False
 
-    def into_dict(self) -> dict:
+    def as_dict(self) -> dict:
         return asdict(self)
 
     @staticmethod

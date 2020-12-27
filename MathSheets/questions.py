@@ -25,11 +25,11 @@ class Differentiate(EquationListQuestion):
         base = copy.copy(simple.pick())
         for i in range(2):
             base.substitute(copy.copy(simple.pick()))
-        return base.into_sympy()
+        return base.as_sympy()
 
 
-class ExpandPolynomial(EquationListQuestion):
-    """docstring for ExpandPolynomial"""
+class ExpandPolynomialABC(EquationListQuestion):
+    """docstring for ExpandPolynomialABC"""
     _topic = Topics.ALGEBRA
     _prompt = Prompts.EXPAND
 
@@ -41,8 +41,19 @@ class ExpandPolynomial(EquationListQuestion):
             answers.append(simplify(expand(expr)))
         return questions, answers
 
+
+class ExpandCubic(ExpandPolynomialABC):
+    """docstring for ExpandCubic"""
+
     def _new_expr(self):
-        return Poly.of_degree(3).into_sympy()
+        return Poly.of_degree(3).as_sympy()
+
+
+class ExpandQuadratic(ExpandPolynomialABC):
+    """docstring for ExpandQuadratic"""
+
+    def _new_expr(self):
+        return Poly.of_degree(2).as_sympy()
 
 
 class MatrixInverse(EquationListQuestion):
